@@ -1,2 +1,2 @@
 # reliqua
-Cross-platform HTTP client
+Lightweight Cross-platform HTTP client
