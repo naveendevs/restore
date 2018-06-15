@@ -1,0 +1,502 @@
+<!-- Import Export -->
+<div id="importExportModal" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Import/Export</h5>
+        <button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-header x-modal-header-secondary">
+        <ul class="nav nav-tabs" role="tablist" style="width: 100%;">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#importExportModalImportTab" role="tab">Import</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#importExportModalExportTab" role="tab">Export</a>
+          </li>
+        </ul>
+			</div>
+			<div class="modal-body" style="padding:0;">
+				<div class="d-flex flex-column" style="flex:1; overflow:hidden;">
+					<div class="d-flex flex-column tab-content" style="flex:1">
+						<div class="tab-pane fade show active" id="importExportModalImportTab" role="tabpanel" style="overflow: auto; padding:16px;">
+							<div>Import format will be automatically detected (Restore, Swagger, Postman)</div>
+							<div class="margin-top-10"></div>
+							<div id="drop_zone" class="x-dropzone d-flex flex-column justify-content-center align-items-center" ondrop="importFileDropHandler(event);" ondragover="allowDrop(event);">
+							  <i class="fas fa-download icon-large"></i>
+							  <div class="margin-top-10"></div>
+							  <div>Drop a file here to import</div>
+							</div>
+							<div class="margin-top-10"></div>
+							<div class="d-flex flex-column justify-content-center align-items-center">
+								<div>OR</div>
+								<div class="margin-top-10"></div>
+								<div class="x-button x-button-default" onclick="importFileChooseHandler()">Choose File</div>
+							</div>
+						</div>
+
+						<div class="justify-content-between tab-pane fade" id="importExportModalExportTab" role="tabpanel" style="overflow: auto; padding: 6px 16px;">
+							<div class="d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                <div>Select collections to export</div>
+                <div class="d-flex flex-row x-height-100">
+                  <div class="x-button x-height-100">All</div>
+                  <div class="x-button x-height-100">None</div>
+                </div>
+              </div>
+              <!--
+							<span class="checkbox" style="margin-left:30px;">
+								<label><input id="selectAllCollections" type="checkbox" name="selectAllCollections"  value="true">&nbsp;Select All</label>
+							</span>
+              -->
+							<div id="importExportModalExportCollectionList" style="overflow: auto; max-height: 60vh;"></div>
+              <div class="modal-footer d-flex flex-row justify-content-center">
+                <div class="x-button x-button-default" onclick="app.exportMultipleCollections()">Export Selected</div>
+              </div>
+						</div>
+					</div>
+			</div>
+		</div>
+	</div>
+  </div>
+</div>
+
+
+<!-- Add New Request -->
+<div id="requestModal" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create New Request</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <form>
+          <div class="form-group">
+            <label for="inputRequestName">Request Name</label>
+            <input type="text" class="form-control" placeholder="Enter request name" id="requestModalInputName">
+            <div class='x-error-msg'>Enter Request Name</div>
+          </div>
+          <div class="form-group">
+            <label for="inputRequestDesc">Method</label>
+            <select class="form-control" id="requestModalInputMethodSelect">
+              <option>GET</option>
+              <option>PUT</option>
+              <option>POST</option>
+              <option>DELETE</option>
+              <option>PATCH</option>
+              <option>OPTIONS</option>
+              <option>HEAD</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inputRequestURI">Request URI</label>
+            <input type="text" class="form-control" placeholder="Enter request URL eg. http://localhost/sample..." id="requestModalInputUri">
+          </div>
+          <div class="form-group">
+            <label for="inputRequestDesc">Description</label>
+            <textarea class="form-control" id="requestModalInputDesc" placeholder="Enter description"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="inputRequestDesc">Collection</label>
+            <div class="x-button" style="float:right;" data-dismiss="modal" data-toggle="modal" data-target="#collectionModal">Add New Collection</div>
+            <select class="form-control" id="requestModalInputCollectionSelect">
+            </select>
+          </div>
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="requestModalSaveBtn">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- New Collection -->
+<div id="collectionModal" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create New Collection</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="inputRequestName">Collection Name</label>
+            <input type="text" class="form-control" placeholder="Enter collection name" id="collectionModalInputName">
+            <div class='x-error-msg'>Enter Collection Name</div>
+          </div>
+          <div class="form-group">
+            <label for="inputRequestDesc">Description</label>
+            <textarea class="form-control" placeholder="Enter description" id="collectionModalInputDesc"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="collectionModalSaveBtn">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preferences -->
+<div id="preferencesModal" class="modal" role="dialog" tabindex="-1">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Preferences</h5><button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body" style="padding:0;">
+				<div class="d-flex flex-column" style="flex:1; overflow:hidden;">
+					<ul class="nav nav-tabs" role="tablist">
+						<li class="nav-item dropdown">
+							<a class="nav-link active" data-toggle="tab" href="#preferencesModalGeneralTab" role="tab">General</a>
+						</li>
+						<li class="nav-item dropdown">
+							<a class="nav-link" data-toggle="tab" href="#preferencesModalProxyTab" role="tab">Proxy</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#preferencesModalThemeTab" role="tab">Theme</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#preferencesModalKeyboardTab" role="tab">Keyboard</a>
+						</li>
+					</ul>
+					<div class="d-flex flex-column tab-content" style="flex:1">
+						<div aria-labelledby="preview-tab" class="tab-pane fade show active" id="preferencesModalGeneralTab" role="tabpanel" style="overflow: auto; padding:1rem;"></div>
+						<div aria-labelledby="preview-tab" class="tab-pane fade" id="preferencesModalProxyTab" role="tabpanel" style="overflow: auto; padding:1rem;">
+							<div>
+								<form>
+									<div class="form-group">
+                    <input class="form-control x-input" id="preferencesModalServerName" placeholder="Hostname" type="text">
+									</div>
+									<div class="form-group">
+										<input class="form-control x-input" id="preferencesModalPort" placeholder="Port number">
+									</div>
+									<div class="checkbox">
+										<label class="" style="font-size:14px; color:#555"><input id="preferencesModalEnable" type="checkbox" name="enabled" checked="" value="true" style="margin-right:5px">Enable</label>
+									</div>
+								</form>
+							</div>
+						</div>
+						<div aria-labelledby="preview-tab" class="tab-pane fade" id="preferencesModalThemeTab" role="tabpanel" style="overflow: auto; padding:1rem;"></div>
+						<div aria-labelledby="preview-tab" class="tab-pane fade" id="preferencesModalKeyboardTab" role="tabpanel" style="overflow: auto; padding:1rem;">
+							<textarea></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="preferencesModalResetBtn" type="button">Reset To Defaults</button>
+        <button class="btn btn-primary" id="preferencesModalSaveBtn" type="button">Save</button>
+        <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+      </div>
+		</div>
+	</div>
+</div>
+
+<!-- Rename Collection -->
+<div id="renameCollectionModel" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Rename Collection</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="inputRequestName">Collection Name</label>
+            <input type="text" class="form-control" id="renameCollectionModelInputName" placeholder="Rename">
+            <div class='x-error-msg collection'>Enter Collection Name</div>
+          </div>
+          <div class="form-group">
+            <label for="inputRequestDesc">Description</label>
+            <textarea class="form-control" id="renameCollectionModelInputDesc" placeholder="Enter description"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="renameCollectionModelSaveBtn">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rename Request -->
+<div id="renameRequestModel" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Rename Request</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="inputRequestName">Request Name</label>
+              <input type="text" class="form-control" id="renameRequestModelInputName" placeholder="Rename">
+              <div class='x-error-msg'>Enter Request Name</div>
+            </div>
+            <div class="form-group">
+              <label for="inputRequestDesc">Description</label>
+              <textarea class="form-control" id="renameRequestModelInputDesc" placeholder="Enter description"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="renameRequestModelSaveBtn">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Delete Collection / Request -->
+<div id="deleteModel" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <p>Confirm delete?</p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" id="deleteModelConfirmBtn">Delete</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="switchToFormURLEncodedTypeModel" class="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Switch Body Type?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <p>Current body will be lost. Are you sure you want to continue?</p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="app.switchToFormURLEncodedConfirm()">Confirm</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Collection as JSON -->
+<!-- Managed Authentication modal -->
+<div id="managedAuthModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Managed Authentication</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex flex-row justify-content-end align-items-start" style="height: 45px; border-bottom: 1px solid #bbb">
+          <div class="x-button x-button-default" data-toggle="modal" data-target="#managedAuthCreateRequestModal" data-dismiss="modal">Create Authentication Request</div>
+        </div>
+        <div class="d-flex flex-column" id="managedAuthModalRequestList">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add to Collection from History -->
+<div id="addToCollectionModel" class="modal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add To Collection</h5><button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="inputRequestName">Request Name</label>
+              <input class="form-control" id="addToCollectionModelInputName" placeholder="Enter request name" type="text">
+              <div class='x-error-msg'>Enter Request Name</div>
+            </div>
+            <div class="form-group">
+              <label for="inputRequestDesc">Description</label>
+              <textarea class="form-control" id="addToCollectionModelInputDesc" placeholder="Enter description"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="inputRequestDesc">Collection</label>
+              <div class="x-button" data-dismiss="modal" data-target="#collectionModal" data-toggle="modal" style="float:right;">
+                Add New Collection
+              </div><select class="form-control" id="addToCollectionModelInputCollectionSelect">
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="addToCollectionModelSaveBtn" type="button">Save</button> <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div id="managedAuthCreateRequestModal" class="modal" role="dialog" tabindex="-1">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">New Authentication Request</h5><button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body" style="padding:0; min-height:400px;">
+					<div class="d-flex flex-column" style="flex-grow:1">
+						<ul class="nav nav-tabs" role="tablist">
+							<li class="nav-item">
+								<a class="nav-link active" data-toggle="tab" href="#managedAuthModalCreateRequestGeneralTab" role="tab">Request</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" data-toggle="tab" href="#managedAuthModalCreateRequestBodyTab" role="tab">Body</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" data-toggle="tab" href="#managedAuthModalCreateRequestHeadersTab" role="tab">Headers</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" data-toggle="tab" href="#managedAuthModalCreateRequestTestTab" role="tab">Test</a>
+							</li>
+						</ul>
+						<div class="tab-content">
+							<div class="tab-pane active" id="managedAuthModalCreateRequestGeneralTab" style="padding:5px 16px; text-align: center">
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                  <input name="managedAuthCreateRequestFormRequestNameInput" class="x-request-form-key-input form-control x-input" type="text" placeholder="Request Name" style="flex-grow:1"/>
+                </div>
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                  <select name="managedAuthCreateRequestFormRequestMethodInput" class="form-control x-input dropdown" id="">
+                    <option disabled selected>Select Method</option>
+                    <option>GET</option>
+                    <option>PUT</option>
+                    <option>POST</option>
+                    <option>DELETE</option>
+                    <option>PATCH</option>
+                    <option>OPTIONS</option>
+                    <option>HEAD</option>
+                  </select>
+                </div>
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                  <input name="managedAuthCreateRequestFormRequestURLInput" class="x-request-form-key-input form-control x-input" type="text" placeholder="Request URL" style="flex-grow:1"/>
+                </div>
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                  <select class="form-control x-input dropdown" id="managedAuthCreateRequestModalAuthTypeInput" onchange="app.handleManagedAuthCreateRequestTypeChange()">
+                    <option disabled selected>Select Authentication Type</option>
+                    <option value="BearerToken">Bearer Token</option>
+                    <option value="OAuth1">OAuth 1.0</option>
+                    <option value="OAuth2">OAuth 2.0</option>
+                  </select>
+                </div>
+                <div id="managedAuthCreateRequestModalAuthTypeBearerView" class="hidden">
+                  <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                    <input name="managedAuthCreateRequestFormBearerTokenPropertyInput" class="x-request-form-key-input form-control x-input" type="text" placeholder="Bearer Token Property" style="flex-grow:1"/>
+                  </div>
+                  <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                    <input name="managedAuthCreateRequestFormBearerTokenPrefixInput" class="x-request-form-key-input form-control x-input" type="text" placeholder="Bearer Token Prefix" style="flex-grow:1"/>
+                  </div>
+                </div>
+                <div id="managedAuthCreateRequestModalAuthTypeOAuth2View" class="hidden">
+                  <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                    <input class="x-request-form-key-input form-control x-input" type="text" placeholder="Access Token Property" style="flex-grow:1"/>
+                  </div>
+                  <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                    <input class="x-request-form-key-input form-control x-input" type="text" placeholder="Refresh Token Property" style="flex-grow:1"/>
+                  </div>
+                </div>
+							</div>
+							<div class="tab-pane" id="managedAuthModalCreateRequestHeadersTab" style="padding:5px 16px; text-align: center">
+								<form id="managedAuthModalCreateRequestHeadersForm"></form>
+								<div class="x-button x-button-default" onclick="app.handleManagedAuthCreateRequestHeadersAdd()" style="margin-top:16px">
+									Add Header
+								</div>
+							</div>
+							<div class="tab-pane" id="managedAuthModalCreateRequestBodyTab" style="height:100px;">
+								<div class="d-flex flex-row justify-content-center">
+									<div class="dropdown d-flex flex-row" style="flex:1">
+										<div id="managedAuthCreateRequestBodyTypeDropdown" class="x-button dropdown-toggle" data-toggle="dropdown" style="border-bottom: 1px solid #bbb;height:40px;justify-content:center;flex:1;">
+											No Body
+										</div>
+										<div aria-labelledby="dLabel" class="dropdown-menu x-dropdown-center" style="left:50%;">
+											<a class="dropdown-item" data-value="MultipartForm" onclick="app.changeAuthRequestBodyType('MultipartForm'), app.setContentTypeHeader('multipart/form-data')">Multipart Form</a>
+                      <a class="dropdown-item" data-value="FormURLEncoded" onclick="app.changeAuthRequestBodyType('FormURLEncoded'), app.setContentTypeHeader('application/x-www-form-urlencoded')">Form URL Encoded</a>
+											<div class="dropdown-divider"></div>
+                      <a class="dropdown-item" data-value="JSON" onclick="app.changeAuthRequestBodyType('JSON'), app.setContentTypeHeader('application/json')">JSON</a>
+                      <a class="dropdown-item" data-value="XML" onclick="app.changeAuthRequestBodyType('XML'), app.setContentTypeHeader('application/xml')">XML</a>
+                      <a class="dropdown-item" data-value="Text" onclick="app.changeAuthRequestBodyType('Text'), app.setContentTypeHeader('text/plain')">Plain Text</a>
+                      <a class="dropdown-item" data-value="Other" onclick="app.changeAuthRequestBodyType('Other')">Other</a>
+											<div class="dropdown-divider"></div>
+                      <a class="dropdown-item" data-value="Binary" onclick="app.changeAuthRequestBodyType('Binary')">Binary File</a>
+                      <a class="dropdown-item" data-value="NoBody" onclick="app.changeAuthRequestBodyType('NoBody')">No Body</a>
+										</div>
+									</div>
+								</div>
+								<div>
+									<ul class="nav nav-tabs d-none" id="managedAuthModalCreateRequestBodyTypeTabList" role="tablist">
+										<li class="nav-item dropup">
+											<a class="nav-link active" data-toggle="tab" href="#managedAuthModalCreateRequestBodyTypeNoBody" role="tab">NoBody</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#managedAuthModalCreateRequestBodyTypeRaw" role="tab">Raw</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#managedAuthModalCreateRequestBodyTypeForm" role="tab">Form</a>
+										</li>
+									</ul>
+									<div class="tab-content" style="padding: 10px 16px;">
+										<div class="tab-pane" id="managedAuthModalCreateRequestBodyTypeForm" role="tabpanel" style="text-align: center">
+											<form id="managedAuthModalCreateRequestFormContainer" name="managedAuthModalCreateRequestFormContainer"></form>
+											<div class="x-button x-button-default" id="managedAuthModalCreateRequestFormAddBtn" style="margin-top:16px">
+												Add Parameter
+											</div>
+										</div>
+										<div class="tab-pane" id="managedAuthModalCreateRequestBodyTypeRaw" role="tabpanel">
+											<div contenteditable="true" placeholder="Enter request body here..." id="managedAuthModalCreateRequestRawContent" style="position: absolute; right: 0; left: 0; bottom: 35px; top: 100px; color:#888; padding: 0px 16px; font-size:12px;"></div>
+										</div>
+										<div class="tab-pane active" id="managedAuthModalCreateRequestBodyTypeNoBody" role="tabpanel" style="text-align: center;">
+                      <i class="far fa-clipboard icon-large x-text-disabled" style="font-size: 60px; margin-top: 30px;"></i>
+                      <div class="margin-top-10"></div>
+                      <div class="x-text-disabled">Select a body type from above</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+          <div class="x-button x-button-default" onclick="app.addAuthRequest()">Create Request</div>
+				</div>
+			</div>
+		</div>
+	</div>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>RESTORE - witty HTTP client</title>
+    <link rel="stylesheet" href="./styles/jquery-ui.css">
+    <link rel="stylesheet" href="./styles/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="./styles/fontawesome.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="./styles/style.css"/>
+  </head>
+
+  <body ondrop="ignoreDrop(event)" ondragover="ignoreDrop(event)">
+    <div id="mainAppLoading" style="position: fixed; top:0; bottom:0; left:0; right:0; background:#fff; z-index:1; display:flex; flex-direction: column; justify-content: center; align-items:center">
+      <div class="" style="margin-top:120px; font-weight:700">LOITER</div>
+      <div class="loading"></div>
+    </div>
+    <div class="d-flex flex-row no-gutters justify-content-between">
+      <div id="listContainer" class="resizable d-flex flex-column justify-content-between" style="min-width: 200px; width:300px; height:100vh; border-right:1px solid #bbb; ">
+        <!-- List content here -->
+      </div>
+      <div id="requestContainer" class="resizable d-flex flex-column justify-content-between" style="flex:1; min-width: 200px; height:100vh; border-right:1px solid #bbb; ">
+        <!-- Request content here -->
+      </div>
+      <div id="responseContainer" class="d-flex flex-column justify-content-between" style="flex:1; min-width: 200px; height:100vh; position:relative">
+        <!-- Response content here -->
+      </div>
+    </div>
+
+    <div id="modalsContainer" style=""></div>
+
+
+    <!-- TEMPLATEs -->
+    <script id="historyTemplate" type="x-handlebars-template">
+        <ul class="x-list" style="padding:0; margin:0;">
+    		{{#each this}}
+  					<li class="d-flex flex-row x-list-group justify-content-between align-items-center" style="padding-left:10px;">
+    						<div class="x-list-group-icon far fa-clock"></div>
+    						<div class="x-list-group-text" title="">{{toDateString @key}}</div>
+                <div class="x-list-group-action x-list-group-icon fas fa-caret-down" ></div>
+  					</li>
+            <ul class="x-list" style="padding:0; margin:0;">
+                {{#each this}}
+               <li class="d-flex flex-row x-list-item justify-content-between align-items-center" data-history-id="{{this._id}}" style="padding-left: 10px;">
+          				<div class="x-list-item-subtext x-list-item-subtext-{{this.method}}">{{this.method}}</div>
+          				<div class="x-list-item-text" title="{{this.uri}}">{{this.uri}}</div>
+					      	<div class="x-list-item-action x-list-group-icon fas fa-caret-down" data-toggle="dropdown" onclick="historyDropdown(this)"></div>
+          			</li>
+                {{/each}}
+            </ul>
+    		{{/each}}
+        </ul>
+    </script>
+
+    <script id="collectionsTemplate" type="x-handlebars-template">
+    		{{#each nodes}}
+    				{{#if isTypeCollection}}
+    					<li class="d-flex flex-row x-list-group justify-content-between align-items-center" data-collection-id = "{{_id}}" style="padding-left:10px;">
+    						<div class="x-list-group-icon far fa-folder"></div>
+    						<div class="x-list-group-text" title="{{description}}">{{name}}</div>
+							<div class="x-list-group-action x-list-group-icon fas fa-caret-down" data-toggle="dropdown" data-parent-id ="{{parent}}" onclick="collectionsDropdown(this, event)"></div>
+    					</li>
+    					<ul class="x-list" style="padding:0; margin:0; display:none; padding-left:20px">
+    							{{> collectionsTemplate}}
+    					</ul>
+            {{else}}
+            <div class="x-list-item-wrapper">
+    					<li class="d-flex flex-row x-list-item justify-content-between align-items-center" data-collection-id="{{collectionId}}" data-request-id="{{_id}}" style="padding-left: 10px;">
+    						<div class="x-list-item-subtext x-list-item-subtext-{{method}}">{{method}}</div>
+    						<div class="x-list-item-text" title="{{uri}}">{{name}}</div>
+							<div class="x-list-item-action x-list-group-icon fas fa-caret-down" data-toggle="dropdown" onclick="requestDropdown(this)"></div>
+              </li>
+            </div>
+    				{{/if}}
+    		{{/each}}
+    </script>
+    <script id="collectionsMainTemplate" type="x-handlebars-template">
+    		{{> collectionsTemplate}}
+    </script>
+
+  	<script id="requestQueryTemplate" type="x-handlebars-template">
+  		{{#each this}}
+  			<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+  				<input class="x-request-form-key-input form-control x-input" onkeyUp="app.handleQueryFormInput()" type="text" placeholder="Name" value="{{@key}}" style="flex-grow:1"/>
+          <div style="width:30px"></div>
+  				<input class="x-request-form-value-input form-control x-input" onkeyUp="app.handleQueryFormInput()" type="text" placeholder="Value" value="{{this}}" style="flex-grow:1"/>
+          <div style="width:30px"></div>
+  				<div class="far fa-times-circle" onclick="app.deleteQueryForm(this)" style="font-size: 14px; text-align:right"></div>
+  			</div>
+  		{{/each}}
+  	</script>
+
+  	<script id="requestQueryNoDataTemplate" type="x-handlebars-template">
+  		<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+  			<input class="x-request-form-key-input form-control x-input" onkeyUp="app.handleQueryFormInput()" type="text" placeholder="Name" value="" style="flex-grow:1"/>
+        <div style="width:30px"></div>
+  			<input class="x-request-form-value-input form-control x-input" onkeyUp="app.handleQueryFormInput()" type="text" placeholder="Value" value="" style="flex-grow:1"/>
+        <div style="width:30px"></div>
+  			<div class="far fa-times-circle" onclick="app.deleteQueryForm(this)" style="font-size: 14px; text-align:right"></div>
+  		</div>
+  	</script>
+
+  	<script id="requestFormRowTemplate" type="x-handlebars-template">
+        {{#each this}}
+    		<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+			  <input class="x-request-form-key-input form-control x-input"  type="text" placeholder="Name" value="{{name}}" style="flex-grow:1"/>
+			  <div style="width:30px"></div>
+			  <input class="x-request-form-value-input form-control x-input" type="text" placeholder="Value" value="{{value}}" style="flex-grow:1"/>
+			  <div style="width:30px"></div>
+			  <div class="far fa-times-circle" onclick="app.deleteForm(this)" style="font-size: 14px; text-align:right"></div>
+    		</div>
+        {{/each}}
+  	</script>
+	<script id="requestFormRowNonEditableTemplate" type="x-handlebars-template">
+		{{#each this}}
+			<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+			  <input class="x-request-form-key-input form-control x-input"  type="text" disabled placeholder="Name" value="{{name}}" style="flex-grow:1"/>
+			  <div style="width:30px"></div>
+			  <input class="x-request-form-value-input form-control x-input" type="text" disabled placeholder="Value" value="{{value}}" style="flex-grow:1"/>
+			  <div style="width:30px"></div>
+			</div>
+		{{/each}}
+  	</script>
+	<script id="requestFormFormDataTemplate" type="x-handlebars-template">
+		{{#each this}}
+			<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+				<input class="x-request-form-key-input form-control x-input"  type="text" placeholder="Name" value="{{name}}" style="flex-grow:1"/>
+				<div style="width:30px"></div>
+				<input class="x-request-form-value-input form-control x-input x-form-text" type="text" placeholder="Value" value="{{value}}" style="flex-grow:1"/>
+				<div style="width:30px"></div>
+				<div class="fas fa-file" onclick="app.handleFormAsfile(this)" style="font-size: 14px; text-align:right"></div>
+				<div style="width:30px"></div>
+				<div class="far fa-times-circle" onclick="app.deleteForm(this)" style="font-size: 14px; text-align:right"></div>
+			</div>
+
+		{{/each}}
+	</script>
+
+	<script id="requestFormLoadFormDataTemplate" type="x-handlebars-template">
+		{{#each this}}
+			<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+				<input class="x-request-form-key-input form-control x-input"  type="text" placeholder="Name" value="{{name}}" style="flex-grow:1"/>
+				<div style="width:30px"></div>
+				<input class="x-request-form-value-input form-control x-input x-form-text" type="{{type}}" placeholder="Value" value="{{value}}" style="flex-grow:1"/>
+				{{#unless bodyType}}
+					{{#ifeq type}}
+						<div style="width:30px"></div>
+						<div class="fas fa-file" onclick="app.handleFormAsfile(this)" style="font-size: 14px; text-align:right"></div>
+					{{else}}
+						<div style="width:30px"></div>
+						<div class="fas fa-font" onclick="app.handleFormAsfile(this)" style="font-size: 14px; text-align:right"></div>
+					{{/ifeq}}
+				{{/unless}}
+				<div style="width:30px"></div>
+				<div class="far fa-times-circle" onclick="app.deleteForm(this)" style="font-size: 14px; text-align:right"></div>
+			</div>
+		{{/each}}
+	</script>
+
+	<script id="requestFormFormUrlEncodedTemplate" type="x-handlebars-template">
+		{{#each this}}
+			<div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+				<input class="x-request-form-key-input form-control x-input"  type="text" placeholder="Name" value="{{name}}" style="flex-grow:1"/>
+				<div style="width:30px"></div>
+				<input class="x-request-form-value-input form-control x-input x-form-text" type="text" placeholder="Value" value="{{value}}" style="flex-grow:1"/>
+				<div style="width:30px"></div>
+				<div class="far fa-times-circle" onclick="app.deleteForm(this)" style="font-size: 14px; text-align:right"></div>
+			</div>
+
+		{{/each}}
+	</script>
+
+  	<script id="responseStatusTemplate" type="x-handlebars-template">
+      <div class="x-badge {{statusClass}}" display="inline-flex" id="statusCode"><b>{{statusCode}}</b>{{statusMessage}}</div>
+    </script>
+
+  	<script id="responseHeaderTemplate" type="x-handlebars-template">
+      <div class="d-flex flex-row align-items-start" style="width:100%; border-bottom: 1px solid #bbb; padding: 6px 0; font-weight:600; font-size:12px;">
+        <div style="flex:1;">NAME</div>
+        <div style="flex:1;">VALUE</div>
+      </div>
+      {{#each this}}
+      <div class="d-flex flex-row align-items-start" style="width:100%; border-bottom: 1px solid #bbb; padding: 6px 0;">
+        <div style="flex:1; overflow: auto; word-wrap: break-word;">{{@key}}</div>
+        <div style="flex:1; overflow: auto; word-wrap: break-word;">{{this}}</div>
+      </div>
+      {{/each}}
+    </script>
+
+    <script id="noResponseScreen" type="x-handlebars-template">
+      <div id="noResponseContainer" style="padding:0 40px;position: absolute; top:0; bottom:0; left:0; right:0; background:#fff; z-index:0; display:flex; flex-direction: column; justify-content: center; align-items:center">
+      <div class="x-text-disabled">Keyboard Shortcuts</div>
+        <div class="margin-top-10"></div>
+        <div class="margin-top-10"></div>
+        <div class="d-flex flex-row justify-content-between align-items-center" style="width:100%">
+          <div style="padding:0px 20px" class="x-text-disabled">Send Request</div>
+          <div style="padding:0px 20px;" class="x-badge bg-default">Ctrl Enter</div>
+        </div>
+        <div class="margin-top-10"></div>
+        <div class="d-flex flex-row justify-content-between align-items-center" style="width:100%">
+          <div style="padding:0px 20px" class="x-text-disabled">Focus Url Bar</div>
+          <div style="padding:0px 20px;" class="x-badge bg-default">Ctrl U</div>
+        </div>
+        <div class="margin-top-10"></div>
+        <div class="d-flex flex-row justify-content-between align-items-center" style="width:100%">
+          <div style="padding:0px 20px" class="x-text-disabled">New Request</div>
+          <div style="padding:0px 20px;" class="x-badge bg-default">Ctrl N</div>
+        </div>
+      </div>
+    </script>
+
+    <script id="exportCollectionListTemplate" type="x-handlebars-template">
+    		{{#each this}}
+          <div class="d-flex flex-row align-items-center x-button" style="height:40px; border-bottom: 1px solid #ddd; padding:0 5px">
+            <input id="export-collection-{{_id}}" type="checkbox" name="export-collection-{{_id}}" value="true" class="x-height-100" style="width:30px;">
+            <label for="export-collection-{{_id}}" class="x-height-100 d-flex align-items-center" style="flex:1; margin:0;">{{name}}</label>
+          </div>
+    		{{/each}}
+    </script>
+	<script id ="managedAuthModalRequestTemplate" type="x-handlebars-template">
+		{{#each this}}
+		<div class="d-flex flex-row justify-content-between align-items-center" style="border-bottom: 1px solid #ddd; padding: 6px 0">
+            <div class="x-list-item-subtext x-bold-text" style="width:70px; font-weight:500; color:#555; text-transform: uppercase; flex-shrink:0; flex-grow:0;">{{authType}}</div>
+            <div class="d-flex flex-column" style="overflow:hidden; flex:1">
+              <div class="x-list-item-text x-bold-text">{{request.name}}</div>
+              <div class="x-list-item-text">
+                <span class="x-list-item-subtext x-list-item-subtext-POST" style="padding-right:5px; font-weight:600">{{request.method}}</span>
+               {{request.uri}}
+              </div>
+			  {{#ifBearer authType}}
+				<div class="x-list-item-text">Token Property <span style="font-weight:600">{{bearer.token}}</span></div>
+				{{else}}
+				<div class="x-list-item-text">Token Property <span style="font-weight:600">{{oauth2.accessToken}}</span></div>
+			  {{/ifBearer}}
+            </div>
+            <div class="d-flex flex-row" style="flex-shrink:0; flex-grow:0;">
+              <div style="padding:0 6px" class="x-button fas fa-pencil-alt icon-large" data-auth-id ="{{_id}}" onclick="app.editAuthRequest(this)"></div>
+              <div style="padding:0 6px" class="x-button fas fa-vial icon-large" onclick="historyDropdown(this)"></div>
+              <div style="padding:0 6px" class="x-button far fa-times-circle icon-large" data-auth-id ="{{_id}}" onclick="app.deleteAuthRequest(this)"></div>
+              <div class="x-button x-button-default x-margin-left-5" onclick="app.useAuthThisAuthRequest(this)">Use This</div>
+            </div>
+          </div>
+		 {{/each}}
+	</script>
+    <script>
+      var app = require('./scripts/renderer.js')
+    </script>
+
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script src="./scripts/jquery-ui.js" crossorigin="anonymous"></script>
+    <script src="./scripts/handlebars.js"></script>
+
+    <script>
+      Handlebars.registerHelper('toDateString', function(text) {
+        return new Handlebars.SafeString((new Date(Number(text))).toDateString());
+      });
+	  Handlebars.registerHelper('ifeq', function(type, options) {
+		  if(type === "text") {
+			return options.fn(this);
+		  } else {
+			return options.inverse(this);
+		  }
+	  });
+	  Handlebars.registerHelper('ifBearer', function(type, options) {
+		  if(type === "Bearer") {
+			return options.fn(this);
+		  } else {
+			return options.inverse(this);
+		  }
+	  });
+	  Handlebars.registerHelper('unless', function(bodyType, options) {
+		  if(bodyType === "MultipartForm") {
+			return options.fn(this);
+		  }
+	  });
+      var collectionListTemplate = Handlebars.compile(document.getElementById("collectionsTemplate").innerHTML);
+      var historyListTemplate = Handlebars.compile(document.getElementById("historyTemplate").innerHTML);
+      var requestFormRowNonEditableTemplate = Handlebars.compile(document.getElementById("requestFormRowNonEditableTemplate").innerHTML);
+      var requestFormRowTemplate = Handlebars.compile(document.getElementById("requestFormRowTemplate").innerHTML);
+      var requestQueryTemplate = Handlebars.compile(document.getElementById("requestQueryNoDataTemplate").innerHTML);
+      var responseStatusTemplate = Handlebars.compile(document.getElementById("responseStatusTemplate").innerHTML);
+      var responseHeaderTemplate = Handlebars.compile(document.getElementById("responseHeaderTemplate").innerHTML);
+      var requestFormFormDataTemplate = Handlebars.compile(document.getElementById("requestFormFormDataTemplate").innerHTML);
+      var requestFormFormUrlEncodedTemplate = Handlebars.compile(document.getElementById("requestFormFormUrlEncodedTemplate").innerHTML);
+
+      var exportCollectionListTemplate = Handlebars.compile(document.getElementById("exportCollectionListTemplate").innerHTML);
+
+
+      $('#listContainer').load('./views/listView.html', function() {
+        $('#requestContainer').load('./views/requestView.html', function() {
+          $('#responseContainer').load('./views/responseView.html', function() {
+            $(".resizable").resizable({
+              handles: "e",
+              grid: [5,0]
+            });
+            loadAppData();
+          });
+        });
+      });
+      $('#modalsContainer').load('./views/modals.html', function() {
+      });
+      function ignoreDrop(ev) {
+        ev.preventDefault();
+      }
+      function allowDrop(ev) {
+          ev.preventDefault();
+      }
+      function importFileDropHandler(ev) {
+        ev.preventDefault();
+
+        if (ev.dataTransfer.items) {
+          // Use DataTransferItemList interface to access the file(s)
+          for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+            // If dropped items aren't files, reject them
+            if (ev.dataTransfer.items[i].kind === 'file') {
+              var file = ev.dataTransfer.items[i].getAsFile();
+              console.log('... file[' + i + '].name = ' + file);
+
+              $('#importExportModal .modal-body').append('<div class="loading"></div>');
+              app.importFile(file.path, function(res) {
+                $('#importExportModal .modal-body .loading').remove();
+                alert('\''+res.info.title + '\' imported as a new collection!')
+                $('#importExportModal').modal('toggle');
+                app.reloadCollectionList();
+              }, function(err) {
+                $('#importExportModal .modal-body .loading').remove();
+                alert(err.message)
+              });
+            }
+          }
+        } else {
+          // Use DataTransfer interface to access the file(s)
+          for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+            console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
+          }
+        }
+      }
+
+      function loadAppData() {
+        app.selectedRequest = {}
+        $('#responseContainer').append($('#noResponseScreen').html());
+
+        Handlebars.registerPartial( "collectionsTemplate", $( "#collectionsTemplate" ).html() );
+
+        $('#headerView').append(requestFormRowTemplate([{name:'', value:''}]));
+        $('#queryView').append(requestQueryTemplate([{}]));
+
+        $('#collectionsList').on('click','.x-list-item', function () {
+          $('.x-list-item.active').removeClass('active');
+          $(this).addClass('active');
+          const requestId = $(this).attr('data-request-id');
+          if (requestId && requestId != app.selectedRequest._id) {
+            db.request.findOne({_id : $(this).attr('data-request-id')}, function(err, res){
+			if(res){
+              app.selectedRequest = res;
+              app.selectedRequestType = 'COLLECTION';
+              app.setSelectedRequest(res);
+			}
+            })
+          }
+        });
+		$('#collectionsList').on('click','.x-list-group', function (e) {
+		 if(!$(e.target).hasClass('fas')){
+			$(this).next('ul').toggle();
+		 }
+          const collectionId = $(this).attr('data-collection-id');
+          if (collectionId) {
+              app.setSelectedCollection(collectionId);
+          }
+        });
+        $('#inputUrl').keypress(function (e) {
+          if (e.keyCode == 13) {
+            app.getResponse();
+          }
+        });
+
+
+        $('#historyList').on('click','.x-list-item', function () {
+          $('.x-list-item.active').removeClass('active');
+          $(this).addClass('active');
+          const historyId = $(this).attr('data-history-id');
+          if (historyId && historyId != app.selectedRequest._id) {
+            db.history.findOne({_id : $(this).attr('data-history-id')}, function(err, res){
+              app.selectedRequest = res;
+              app.selectedRequestType = 'HISTORY';
+              app.setSelectedRequest(res);
+            })
+          };
+        });
+
+        app.loadHistoryData();
+        app.loadRequestsData(function(res){
+          console.log(res);
+          $('#collectionsList').html(collectionListTemplate(res));
+          //app.collections = res;
+          //app.selectedRequest = {};
+          $('#mainAppLoading').remove();
+        })
+
+		$('#enableBearerToken').click(function() {
+				app.changeAuthorizationHeader('BearerToken');
+		});
+
+		$('#enableBasicToken').click(function() {
+				app.changeAuthorizationHeader('BasicAuth');
+		});
+
+		$("#requestAuthTypeTabList").click(function(){
+			var selText = $(this).text();
+			console.log(selText);
+		});
+
+        $("#listContainerHeadMenu").click(function(){
+          app.state.selectedMenuId = null;
+          app.state.selectedMenuType = null;
+        });
+
+        $(".dropdown-menu a").click(function() {
+  			//if($(this).text() !== "Form URL Encoded"){
+  				var dropdownText = $(this).text();
+  				$(this).parents('.dropdown').find('.dropdown-toggle').html(dropdownText);
+			  //}
+        });
+
+        $("#renameCollectionModel").on('shown.bs.modal', function(){
+          $("#renameCollectionModel .x-error-msg").hide();
+            app.getCollectionById(app.state.selectedMenuId);
+            $(this).find('#renameCollectionModelInputName').focus();
+        });
+
+        $("#renameCollectionModelSaveBtn").click(function (){
+            if($("#renameCollectionModelInputName").val().trim() == ""){
+            $("#renameCollectionModel .x-error-msg").show();
+            return false;
+            }
+            app.updateCollection(app.state.selectedMenuId, $("#renameCollectionModelInputName").val(), $("#renameCollectionModelInputDesc").val());
+        });
+
+        $("#renameRequestModel").on('shown.bs.modal', function(){
+          $("#renameRequestModel .x-error-msg").hide();
+            app.getRequest(app.state.selectedMenuId);
+            $(this).find('#renameRequestModelInputName').focus();
+        });
+
+        $("#renameRequestModelSaveBtn").click(function (){
+            if($("#renameRequestModelInputName").val().trim() == ""){
+            $("#renameRequestModel .x-error-msg").show();
+            return false;
+            }
+            app.updateRequestById(app.state.selectedMenuId, $("#renameRequestModelInputName").val(), $("#renameRequestModelInputDesc").val());
+        });
+
+        $("#collectionModal").on('shown.bs.modal', function(){
+            $("#collectionModal .x-error-msg").hide();
+            $("#collectionModalInputName").val("");
+            $("#collectionModalInputDesc").val("");
+            $(this).find('#collectionModalInputName').focus();
+        });
+
+        $("#collectionModalSaveBtn").click(function(){
+          if($("#collectionModalInputName").val().trim() == ""){
+            $("#collectionModal .x-error-msg").show();
+            return false;
+          }
+          if(app.state.selectedMenuType == 'COLLECTION'){
+            app.addCollection($("#collectionModalInputName").val(), $("#collectionModalInputDesc").val(), app.state.selectedMenuId);
+          }else{
+            app.addCollection($("#collectionModalInputName").val(), $("#collectionModalInputDesc").val(), null);
+          }
+        });
+
+		app.initializePreferences();
+		$("#preferencesModalSaveBtn").click(function(){
+          app.updatePreferences();
+        })
+
+		$("#preferencesModalResetBtn").click(function(){
+          app.resetPreferences();
+        })
+
+        $("#requestModal").on('shown.bs.modal', function() {
+          $("#requestModal .x-error-msg").hide();
+          $('#requestModalInputName').val("");
+          $("#requestModalInputMethodSelect").prop("selectedIndex", 0);
+          $('#requestModalInputUri').val("");
+          $('#requestModalInputDesc').val("");
+          $('#requestModalInputCollectionSelect').val("");
+
+          if (app.state.selectedMenuType == 'COLLECTION') {
+            app.populateCollectionList('requestModalInputCollectionSelect', true)
+          } else {
+            app.populateCollectionList('requestModalInputCollectionSelect', false)
+          }
+        });
+
+        $("#requestModalSaveBtn").click(function(){
+          if($("#requestModalInputName").val().trim() == ""){
+            $("#requestModal .x-error-msg").show();
+            return false;
+          }
+          var requestObj={};
+          requestObj.name=$("#requestModalInputName").val();
+          requestObj.method=$("#requestModalInputMethodSelect").val();
+          requestObj.uri=$("#requestModalInputUri").val();
+          requestObj.desc=$("#requestModalInputDesc").val();
+          requestObj.collectionId=$("#requestModalInputCollectionSelect").val();
+          app.addRequest(requestObj, function() {
+            $('#requestModal .modal-body .loading').remove();
+            $('#requestModal').modal('toggle');
+            app.reloadCollectionList();
+          });
+        })
+
+        $("#addToCollectionModel").on('shown.bs.modal', function(){
+          $("#addToCollectionModel .x-error-msg").hide();
+          $('#addToCollectionModelInputName').val("");
+          $('#addToCollectionModelInputDesc').val("");
+          app.populateCollectionList('addToCollectionModelInputCollectionSelect', false)
+        });
+
+        $("#addToCollectionModelSaveBtn").click(function(){
+          if($("#addToCollectionModelInputName").val().trim() == ""){
+            $("#addToCollectionModel .x-error-msg").show();
+            return false;
+          }
+          $('#addToCollectionModel .modal-body').append('<div class="loading"></div>');
+          app.getHistoryById(app.state.selectedMenuId, function(res){
+            res.name = $("#addToCollectionModelInputName").val();
+            res.desc = $("#addToCollectionModelInputDesc").val();
+            res.collectionId = $("#addToCollectionModelInputCollectionSelect").val();
+            app.addRequest(res, function() {
+              $('#addToCollectionModel .modal-body .loading').remove();
+              $('#addToCollectionModel').modal('toggle');
+              app.reloadCollectionList();
+            });
+          });
+        })
+
+        $("#deleteModelConfirmBtn").click(function(){
+          if (app.state.selectedMenuType == 'REQUEST') {
+            app.removeRequest(app.state.selectedMenuId);
+          } else if(app.state.selectedMenuType == 'COLLECTION') {
+            app.removeCollection(app.state.selectedMenuId);
+          }else{
+            app.removeFromHistory(app.state.selectedMenuId);
+          }
+        })
+
+		    $("#requestQueryFormAddBtn").click(function() {
+          $('#queryView').append(requestQueryTemplate([{}]));
+        });
+
+		    $("#requestBodyTypeFormAddBtn").click(function() {
+			if($('#requestBodyTypeDropdown').attr('data-value') === "MultipartForm"){
+				$('#requestBodyTypeFormContainer').append(requestFormFormDataTemplate([{}]));
+			} else {
+				$('#requestBodyTypeFormContainer').append(requestFormFormUrlEncodedTemplate([{}]));
+			}
+    });
+
+    $("#requestHeaderFormAddBtn").click(function() {
+        $('#headerView').append(requestFormRowTemplate([{}]));
+    });
+
+		$("#exportCollections").click(function(){
+			app.loadRequestsData(function(res){
+				if($("#selectAllCollections").is(':checked')){
+					app.exportMultipleCollections(res);
+				} else {
+					var listOfSelectedCollections ={};
+					listOfSelectedCollections.nodes=[];
+					$.each(res.nodes, function(key,val){
+						if($("#"+val._id).is(':checked')){
+							listOfSelectedCollections.nodes.push(val);
+						}
+					});
+					app.exportMultipleCollections(listOfSelectedCollections);
+				}
+			});
+
+		})
+		$("#historyListSearch").keyup(function(evt){
+        var searchInput = $(this).val();
+        if (searchInput == undefined || !searchInput) {
+          app.reloadCollectionList();
+          return;
+        }
+			  app.getSearchData(searchInput, function(filteredData){
+					$('#collectionsList').html(collectionListTemplate(filteredData));
+        })
+    })
+
+  } //end of loadAppData
+
+    function historyDropdown(el) {
+      ($(el).siblings('.dropdown-menu').length<1) && $(el).after($('#historyDropdown').html())
+      app.state.selectedMenuId = $(el).parent().attr("data-history-id");
+      app.state.selectedMenuType = "HISTORY";
+    }
+
+    function collectionsDropdown(el, e) {
+		//e.preventDefault();
+      app.state.selectedMenuId = $(el).parent().attr("data-collection-id");
+      app.state.selectedMenuType = 'COLLECTION';
+      if($(el).attr("data-parent-id") == ""){
+        ($(el).siblings('.dropdown-menu').length<1) && $(el).after($('#collectionsDropdownParent').html())
+      } else {
+        ($(el).siblings('.dropdown-menu').length<1) && $(el).after($('#collectionsDropdown').html())
+      }
+    }
+
+    function requestDropdown(el) {
+      app.state.selectedMenuId = $(el).parent().attr("data-request-id");
+      app.state.selectedMenuType = 'REQUEST';
+      ($(el).siblings('.dropdown-menu').length<1) && $(el).after($('#requestDropdown').html())
+    }
+
+  	function importFileChooseHandler(){
+  		app.importFileChooseHandler();
+  	}
+
+    </script>
+  </body>
+</html>

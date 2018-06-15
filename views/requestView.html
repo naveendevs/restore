@@ -1,0 +1,204 @@
+<div id="requestContainerHead" class="d-flex flex-row align-items-center" style="display: inline-flex; height:50px; border-bottom:1px solid #bbb;">
+  <div class="dropdown x-height-100">
+    <div class="x-button x-height-100 dropdown-toggle" data-toggle="dropdown" id="method">GET</div>
+    <div class="dropdown-menu" aria-labelledby="dLabel">
+      <a class="dropdown-item x-list-item-subtext-GET" href="#">GET</a>
+      <a class="dropdown-item x-list-item-subtext-PUT" href="#">PUT</a>
+      <a class="dropdown-item x-list-item-subtext-POST" href="#">POST</a>
+      <a class="dropdown-item x-list-item-subtext-DELETE" href="#">DELETE</a>
+      <a class="dropdown-item x-list-item-subtext-PATCH" href="#">PATCH</a>
+      <a class="dropdown-item x-list-item-subtext-OPTIONS" href="#">OPTIONS</a>
+      <a class="dropdown-item x-list-item-subtext-HEAD" href="#">HEAD</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">Custom Method</a>
+    </div>
+  </div>
+      <input class="input-group x-input x-height-100" style="flex: 1" id="inputUrl" type="text" placeholder="https://example-host/example-path..." onkeyup="app.showQueryParameters()">
+			<div class="x-button x-height-100" onclick="app.getResponse()">Send</div>
+</div>
+
+
+<div id="requestContainerMain" style="flex-grow:1" class="d-flex flex-column">
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+		<li class="nav-item dropdown">
+			<a class="nav-link active" data-toggle="tab" href="#requestBodyTab" role="tab">Body</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-toggle="tab" href="#requestHeadersTab" role="tab">Headers</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-toggle="tab" href="#requestQueryTab" role="tab">Query</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-toggle="tab" href="#requestAuthTab" role="tab">Auth</a>
+		</li>
+	</ul>
+
+  <div class="tab-content">
+
+    <div class="tab-pane" id="requestHeadersTab" style="padding:5px 16px; text-align: center">
+      <form id="headerView"></form>
+      <div class="x-button x-button-default" id="requestHeaderFormAddBtn" style="margin-top:16px">Add Header</div>
+    </div>
+
+    <div class="tab-pane active" id="requestBodyTab" style="">
+        <div class="d-flex flex-row justify-content-center">
+          <div class="dropdown d-flex flex-row" style="flex:1">
+            <div class="x-button dropdown-toggle" data-toggle="dropdown" id="requestBodyTypeDropdown" style="border-bottom: 1px solid #bbb;height:40px;justify-content:center;flex:1;">No Body</div>
+            <div class="dropdown-menu x-dropdown-center" aria-labelledby="dLabel" style="left:50%;">
+              <a class="dropdown-item" data-value="MultipartForm" onclick="app.changeRequestBodyType('MultipartForm'),app.setContentTypeHeader('multipart/form-data')">Multipart Form</a>
+              <a class="dropdown-item" data-value="FormURLEncoded" onclick="app.changeRequestBodyType('FormURLEncoded'),app.setContentTypeHeader('application/x-www-form-urlencoded')">Form URL Encoded</a>
+              <div class="dropdown-divider">RAW</div>
+              <a class="dropdown-item" data-value="JSON" onclick="app.changeRequestBodyType('JSON'),app.setContentTypeHeader('application/json')">JSON</a>
+              <a class="dropdown-item" data-value="XML" onclick="app.changeRequestBodyType('XML'),app.setContentTypeHeader('application/xml')">XML</a>
+              <a class="dropdown-item" data-value="Text" onclick="app.changeRequestBodyType('Text'),app.setContentTypeHeader('text/plain')">Plain Text</a>
+              <a class="dropdown-item" data-value="Other" onclick="app.changeRequestBodyType('Other')">Other</a>
+              <div class="dropdown-divider">OTHER</div>
+              <a class="dropdown-item" data-value="Binary" onclick="app.changeRequestBodyType('Binary')">Binary File</a>
+              <a class="dropdown-item" data-value="NoBody" onclick="app.changeRequestBodyType('NoBody')">No Body</a>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <ul class="nav nav-tabs d-none" id="requestBodyTypeTabList" role="tablist">
+        		<li class="nav-item dropdown">
+        			<a class="nav-link active" data-toggle="tab" href="#requestBodyTypeNoBody" role="tab">NoBody</a>
+        		</li>
+        		<li class="nav-item">
+        			<a class="nav-link" data-toggle="tab" href="#requestBodyTypeRaw" role="tab">Raw</a>
+        		</li>
+        		<li class="nav-item">
+        			<a class="nav-link" data-toggle="tab" href="#requestBodyTypeForm" role="tab">Form</a>
+        		</li>
+        	</ul>
+
+          <div class="tab-content" style="padding: 10px 16px;">
+            <div class="tab-pane" id="requestBodyTypeForm" role="tabpanel" style="text-align: center">
+              <form id="requestBodyTypeFormContainer"></form>
+              <div class="x-button x-button-default" id="requestBodyTypeFormAddBtn" style="margin-top:16px">Add Parameter</div>
+            </div>
+            <div class="tab-pane" id="requestBodyTypeRaw" role="tabpanel">
+              <div id="requestBodyTypeRawContent" contenteditable="true" placeholder="Enter request body here..." style="position: absolute; right: 0; left: 0; bottom: 35px; top: 130px; color:#888; padding: 0px 16px; font-size:12px;"></div>
+            </div>
+            <div class="tab-pane active" id="requestBodyTypeNoBody" role="tabpanel" style="text-align: center;">
+              <div style="position: absolute; right: 0; left: 0; bottom: 35px; top: 130px; display: flex; justify-content: center; flex-direction: column; align-items: center; color:#888">
+                <i class="far fa-clipboard icon-large x-text-disabled" style="font-size: 60px;"></i>
+                <div class="margin-top-10"></div>
+                <div class="x-text-disabled">Select a body type from above</div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="tab-pane" id="requestQueryTab" style="padding:5px 16px; text-align: center">
+      <form id="queryView"></form>
+      <div class="x-button x-button-default" id="requestQueryFormAddBtn" style="margin-top:16px">Add Query Parameter</div>
+    </div>
+
+    <div class="tab-pane" id="requestAuthTab" style="">
+      <div class="d-flex flex-row justify-content-center">
+        <div class="dropdown d-flex flex-row" style="flex:1">
+          <div class="x-button dropdown-toggle" data-toggle="dropdown" id="requestAuthTypeDropdown" style="height:40px;justify-content:center;flex:1;">No Authentication</div>
+          <div class="dropdown-menu x-dropdown-center" aria-labelledby="dLabel" style="left:50%;">
+            <a class="dropdown-item" data-value="BasicAuth" onclick="app.changeRequestAuthType('BasicAuth')">Basic Auth</a>
+            <a class="dropdown-item" data-value="DigestAuth" onclick="app.changeRequestAuthType('DigestAuth')">Digest Auth</a>
+            <a class="dropdown-item" data-value="OAuth1" onclick="app.changeRequestAuthType('OAuth1')">OAuth 1.0</a>
+            <a class="dropdown-item" data-value="OAuth2" onclick="app.changeRequestAuthType('OAuth2')">OAuth 2.0</a>
+            <a class="dropdown-item" data-value="BearerToken" onclick="app.changeRequestAuthType('BearerToken')">Bearer Token</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" data-value="ManagedAuth" onclick="app.changeRequestAuthType('ManagedAuth')">Managed Authentication</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" data-value="NoAuth" onclick="app.changeRequestAuthType('NoAuth')">No Authentication</a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <ul class="nav nav-tabs d-none" id="requestAuthTypeTabList" role="tablist">
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="tab" href="#requestAuthTypeBasicAuth" role="tab">BasicAuth</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#requestAuthTypeDigestAuth" role="tab">DigestAuth</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#requestAuthTypeOAuth1" role="tab">OAuth1.0</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#requestAuthTypeOAuth2" role="tab">OAuth2.0</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#requestAuthTypeBearerToken" role="tab">BearerToken</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#requestAuthTypeManagedAuth" role="tab">ManagedAuth</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#requestAuthTypeNoAuth" role="tab">NoAuth</a>
+          </li>
+        </ul>
+
+        <div class="tab-content" style="padding: 10px 16px;">
+          <div class="tab-pane" id="requestAuthTypeBasicAuth"  role="tabpanel" style="">
+              <form>
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                  <input class="x-request-form-key-input form-control x-input" onChange="app.changeAuthorizationHeader('BasicAuth')" id="basicAuthUsername" type="text" placeholder="Username" value="" style="flex-grow:1"/>
+                </div>
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                  <input class="x-request-form-key-input form-control x-input"  onChange="app.changeAuthorizationHeader('BasicAuth')" id="basicAuthPassword" type="text" placeholder="Password" value="" style="flex-grow:1"/>
+                </div>
+                <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+ 				<div class="checkbox">
+					<label><input id="enableBasicToken" type="checkbox" name="enableBasicToken" >&nbsp;Enable</label>
+				</div>
+                </div>
+              </form>
+          </div>
+          <div class="tab-pane" id="requestAuthTypeDigestAuth" role="tabpanel">
+          </div>
+          <div class="tab-pane" id="requestAuthTypeOAuth1" role="tabpanel">
+            oauth 1.0
+          </div>
+          <div class="tab-pane" id="requestAuthTypeOAuth2" role="tabpanel">
+            oauth 2.0
+          </div>
+          <div class="tab-pane" id="requestAuthTypeManagedAuth" role="tabpanel">
+            <div class="x-button x-button-default" id="" style="align-: center">Manage</div>
+          </div>
+          <div class="tab-pane" id="requestAuthTypeBearerToken"  role="tabpanel">
+          <form>
+              <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                <input class="x-request-form-key-input form-control x-input" id="bearerToken" onChange="app.changeAuthorizationHeader('BearerToken')" type="text" placeholder="Token" value="" style="flex-grow:1"/>
+              </div>
+              <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+                <input class="x-request-form-key-input form-control x-input" onChange="app.changeAuthorizationHeader('BearerToken')" id="prefixValue" type="text" placeholder="Prefix" value="Bearer" style="flex-grow:1"/>
+              </div>
+              <div class="x-request-form-wrapper d-flex flex-row justify-content-between align-items-center" style="height:40px;">
+				<div class="checkbox">
+					<label><input id="enableBearerToken" type="checkbox" name="enableBearerToken" >&nbsp;Enable</label>
+				</div>
+              </div>
+            </form>
+			</div>
+          <div class="tab-pane active" id="requestAuthTypeNoAuth" role="tabpanel" style="text-align: center;">
+            <div style="position: absolute; right: 0; left: 0; bottom: 35px; top: 130px; display: flex; justify-content: center; flex-direction: column; align-items: center; color:#888">
+              <i class="fas fa-user-secret icon-large x-text-disabled" style="font-size: 60px;"></i>
+              <div class="margin-top-10"></div>
+              <div class="x-text-disabled">Select an authentication type from above</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<div id="requestContainerFoot" class="d-flex align-items-center justify-content-center" style="height:35px; border-top:1px solid #bbb; font-size: 10px; color: #888;">
+  <div id="requestAreaFormatBtn" class="x-button x-height-100" style="font-size:10px; font-weight:600">FORMAT BODY</div>
+  <div id="" class="x-button x-height-100" style="font-size:10px; font-weight:600">REVERT CHANGES</div>
+</div>

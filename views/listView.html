@@ -1,0 +1,146 @@
+<div id="listContainerHead" class="d-flex flex-row justify-content-between align-items-center" style="height: 50px; padding:0 20px; text-shadow:1px 1px 1px #eee ;border-bottom:1px solid #bbb; font-weight:600;">
+  <span style="font-size: 18px;">REST<b style="font-size: 18px;font-weight: 400; color:#888">ORE</b></span>
+  <span>
+    <div class="dropdown">
+      <i class="fas fa-bars icon-medium" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"  id="listContainerHeadMenu"></i>
+      <div class="dropdown-menu" aria-labelledby="dLabel">
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#requestModal" id="listContainerHeadNewRequestSelect">
+          <i class="fas fa-plus" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          New Request
+        </a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#collectionModal" id="listContainerHeadNewCollectionSelect">
+          <i class="fas fa-folder" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          New Collection
+        </a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#importExportModal" onclick="app.populateCollectionsListForExport()">
+          <i class="fas fa-retweet" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Import/Export
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#preferencesModal">
+			<i class="fas fa-cogs" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i> Preferences
+		</a>
+        <a class="dropdown-item" href="#"><i class="fas fa-info-circle" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i> Version 1.0b</a>
+      </div>
+    </div>
+  </span>
+</div>
+
+
+<div id="listContainerMain" style="flex:1; overflow: hidden; display: flex; flex-direction: column;">
+
+  <ul class="nav nav-tabs" role="tablist">
+		<li class="nav-item">
+			<a class="nav-link active" data-toggle="tab" href="#historyListTab" id="home" role="tab">History</a>
+		</li>
+		<li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#collectionsListTab" id="home" role="tab">Collections</a>
+		</li>
+	</ul>
+
+	<div class="tab-content d-flex flex-column" style="overflow: hidden; flex:1;">
+
+		<div class="tab-pane fade show active" id="historyListTab" role="tabpanel" style="overflow-y:scroll; overflow-x:hidden;">
+      <div id="historyList" style="flex:1;"></div>
+ 		</div>
+
+		<div class="tab-pane fade d-flex flex-column justify-content-between" id="collectionsListTab" role="tabpanel" style="overflow: hidden; flex:1">
+      <div class="d-flex flex-row justify-content-between align-items-center" style="padding: 0 10px; margin: 0 10px; border: 1px solid #bbb; border-width: 0 0 1px 0;">
+        <i class="fas fa-search" style="text-align: center; color:#888; width:16px;"></i>
+        <input id="historyListSearch" class="x-input" style="width:100%; padding: 0 10px; height: 40px;" placeholder="Search in collections">
+      </div>
+      <div id="collectionsList" style="flex:1; overflow: auto;"></div>
+		</div>
+	</div>
+
+  <div id="historyDropdown">
+    <div class="dropdown-menu">
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addToCollectionModel" id="historyDropdownAddToCollection">
+          <i class="fas fa-plus" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Add to Collection
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#">
+          <i class="fas fa-code" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Copy as cURL
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#deleteModel" id="historyDropdownDelete">
+          <i class="fas fa-minus-circle" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Delete
+      </a>
+    </div>
+  </div>
+
+  <div id="collectionsDropdown">
+    <div class="dropdown-menu">
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#requestModal" id="collectionsDropdownNewRequestSelect">
+        <i class="fas fa-plus" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+        New Request
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#collectionModal">
+          <i class="fas fa-folder" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          New Collection
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#renameCollectionModel">
+          <i class="fas fa-pencil-alt" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Rename
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#deleteModel">
+          <i class="fas fa-minus-circle" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Delete
+      </a>
+      </a>
+    </div>
+  </div>
+
+   <div id="collectionsDropdownParent">
+    <div class="dropdown-menu">
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#requestModal" id="collectionsDropdownParentNewRequestSelect">
+        <i class="fas fa-plus" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+        New Request
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#collectionModal" id="collectionsDropdownParentNewCollectionSelect">
+          <i class="fas fa-folder" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          New Collection
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#renameCollectionModel">
+          <i class="fas fa-pencil-alt" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Rename
+      </a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#deleteModel">
+          <i class="fas fa-minus-circle" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Delete
+      </a>
+	  <a class="dropdown-item exportButton" href="#" data-toggle="modal" onclick = "app.exportCollection();">
+          <i class="fas fa-download" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+          Export
+      </a>
+    </div>
+  </div>
+
+  <div id="requestDropdown">
+    <div class="dropdown-menu">
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#renameRequestModel">
+            <i class="fas fa-pencil-alt" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+            Rename
+        </a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#" id="linkDropdownDuplicate" onclick="app.duplicateRequest()">
+            <i class="fas fa-clone" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+            Duplicate
+        </a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#" id="linkDropdownCurl">
+            <i class="fas fa-code" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+            Copy as cURL
+        </a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#deleteModel">
+            <i class="fas fa-minus-circle" style="text-align: center; color:#555; width:16px; margin-right:10px;"></i>
+            Delete
+        </a>
+    </div>
+  </div>
+</div>
+
+<div id="listContainerFoot" class="d-flex align-items-center justify-content-center" style="height:35px; border-top:1px solid #bbb; font-size: 10px; color: #888;">
+  <div id="" class="x-button x-height-100" style="font-size:10px; font-weight:600">HIDE HOST</div>
+  <div id="" class="x-button x-height-100" style="font-size:10px; font-weight:600">SHOW URL</div>
+  <div id="" class="x-button x-height-100" style="font-size:10px; font-weight:600">EXPAND ALL</div>
+</div>

@@ -1,0 +1,41 @@
+{
+  "name": "electron-quick-start",
+  "version": "1.0.0",
+  "description": "A minimal Electron application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/electron/electron-quick-start",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "~1.8.2"
+  },
+  "dependencies": {
+    "bootstrap": "^4.0.0-beta.3",
+    "colors": "^1.2.1",
+    "form-data": "^2.3.2",
+    "jquery": "^3.2.1",
+    "jquery-ui": "^1.12.1",
+    "json-beautify": "^1.0.1",
+    "nedb": "^1.8.0",
+    "popper.js": "^1.12.9",
+    "prettyjson": "^1.2.1",
+    "request": "^2.85.0",
+    "swagger-parser": "^4.0.2",
+    "tether": "^1.4.0"
+  },
+  "standard": {
+    "globals": [
+      "$"
+    ]
+  }
+}
